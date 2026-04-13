@@ -18,5 +18,6 @@ This project captures live network traffic, applies firewall rules, and detects 
 
 ## 📅 Progress Log
 ### Day 1 (April 11, 2026)
-- Setup environment
-- Captured packets using Scapy
+- Setup Python, Scapy, Npcap
+- Captured packets
+- Extracted IP, protocol and port
