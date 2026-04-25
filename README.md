@@ -1,130 +1,68 @@
-# \# FirewallX-Core 🔐
+# FirewallX-Core 🔐
 
-# 
+Rule-based Smart Firewall and Intrusion Detection System (IDS) prototype built from scratch using Python and Scapy.
 
-# Smart Firewall and Intrusion Detection System (IDS) built from scratch.
+---
 
-# 
+## 🚀 Overview
 
-# \## 🚀 Overview
+FirewallX-Core captures live network traffic, inspects packets, applies configurable rules, and simulates security decisions (allow / block).
 
-# 
+---
 
-# This project captures live network traffic, applies rule-based filtering, and simulates enforcement decisions using configurable firewall rules.
+## 🧱 Architecture
 
-# 
+Packet Capture → Parse → Rule Engine → Decision
 
-# \## 🎯 Features
+---
 
-# 
+## 🎯 Current Features
 
-# \* Packet capture using Scapy
+* Packet capture using Scapy
+* IP-based filtering
+* Port-based filtering
+* Dynamic JSON rule configuration
+* Simulated firewall decision engine
 
-# \* IP filtering
+---
 
-# \* Port filtering
+## 🛠️ Tech Stack
 
-# \* Dynamic JSON rule engine
+* Python
+* Scapy
+* TCP/IP Networking
 
-# \* Simulated firewall decision engine
+---
 
-# 
+## 📌 Example Output
 
-# \## 🛠️ Tech Stack
+```text
+[BLOCKED:PORT] TCP ... PORT:53
+[BLOCKED:IP] 10.232.93.238 -> 10.232.93.106
+[ALLOWED] TCP ... PORT:443
+```
 
-# 
+---
 
-# \* Python
+## 📅 Progress
 
-# \* Scapy
+* Day 1 — Packet capture + extraction
+* Day 2 — TCP filtering
+* Day 3 — IP filtering
+* Day 4 — Firewall engine
+* Day 5 — Dynamic JSON rules
 
-# \* Networking (TCP/IP)
+---
 
-# 
+## ⚠️ Current Limitation
 
-# \## 📅 Progress Log
+Current implementation performs rule evaluation and simulated blocking.
+Real packet enforcement is the next step.
 
-# 
+---
 
-# \### Day 1
+## 🔜 Next Steps
 
-# 
-
-# \* Added packet capture using Scapy
-
-# \* Built basic packet sniffer
-
-# \* Extracted source/destination IPs and ports
-
-# 
-
-# \### Day 2
-
-# 
-
-# \* Added TCP filtering
-
-# \* Implemented basic port-based blocking logic
-
-# 
-
-# \### Day 3
-
-# 
-
-# \* Added IP-based filtering
-
-# \* Implemented rule checks for blocked IPs
-
-# 
-
-# \### Day 4
-
-# 
-
-# \* Combined modules into firewall\_engine.py
-
-# \* Built unified rule engine (IP + Port filtering)
-
-# 
-
-# \### Day 5
-
-# 
-
-# \* Added dynamic JSON rule configuration (rules.json)
-
-# \* Refactored rule checks into functions
-
-# \* Tested simulated enforcement behavior
-
-# 
-
-# \## Current Status
-
-# 
-
-# ✅ Packet Capture
-
-# ✅ Parsing
-
-# ✅ Filtering
-
-# ✅ Rule Engine
-
-# ✅ Dynamic Config
-
-# 
-
-# \## Next Steps
-
-# 
-
-# \* Windows Firewall enforcement integration
-
-# \* Logging system
-
-# \* Port scan detection (IDS)
-
-
-
+* Windows Firewall enforcement
+* Logging system
+* Port scan detection (IDS)
