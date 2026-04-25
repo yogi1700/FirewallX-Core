@@ -1,4 +1,4 @@
- {
-  block_ips: [10.232.93.238],
-  block_ports: [53]
-} 
+{
+  "block_ips": ["10.232.93.238"],
+  "block_ports": [443]
+}
