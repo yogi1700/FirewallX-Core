@@ -51,6 +51,13 @@ Packet Capture → Parse → Rule Engine → Decision
 * Day 3 — IP filtering
 * Day 4 — Firewall engine
 * Day 5 — Dynamic JSON rules
+* ### Day 6
+
+* Added Windows Firewall enforcement using Python subprocess and netsh
+* Connected rule engine decisions to automated response
+* Added firewall rule existence check to prevent duplicate rules
+* Cleaned enforcement logic
+
 
 ---
 

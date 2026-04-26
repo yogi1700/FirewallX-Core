@@ -1,7 +1,8 @@
 import json
 from scapy.all import sniff, IP, TCP, UDP
+from enforce_firewall import enforce_ip_block
 
-# Load rules from config file
+# Load rules
 with open("../config/rules.json", "r") as f:
     rules = json.load(f)
 
@@ -36,14 +37,19 @@ def process_packet(packet):
         protocol = "UDP"
         port = packet[UDP].dport
 
-    # Apply rules
+    # Rule processing
     if check_ip_rule(src_ip):
+
         print(f"[BLOCKED:IP] {src_ip} -> {dst_ip}")
 
+        enforce_ip_block(src_ip)
+
     elif check_port_rule(port):
+
         print(f"[BLOCKED:PORT] {protocol} {src_ip} -> {dst_ip} PORT:{port}")
 
     else:
+
         print(f"[ALLOWED] {protocol} {src_ip} -> {dst_ip} PORT:{port}")
 
 
