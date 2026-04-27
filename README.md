@@ -58,18 +58,12 @@ Packet Capture → Parse → Rule Engine → Decision
 * Added firewall rule existence check to prevent duplicate rules
 * Cleaned enforcement logic
 
+### Day 7
+
+* Added logging system for firewall events
+* Added threshold-based intrusion alert detection
+* Generated alerts for repeated blocked traffic
+* Reorganized legacy prototype modules into archive/src
+
 
 ---
-
-## ⚠️ Current Limitation
-
-Current implementation performs rule evaluation and simulated blocking.
-Real packet enforcement is the next step.
-
----
-
-## 🔜 Next Steps
-
-* Windows Firewall enforcement
-* Logging system
-* Port scan detection (IDS)
