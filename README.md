@@ -66,4 +66,11 @@ Packet Capture → Parse → Rule Engine → Decision
 * Reorganized legacy prototype modules into archive/src
 
 
+### Day 8
+* Added basic port scan detection
+* Added session summary output
+* Added host sweep (reconnaissance) detection
+* Improved anomaly detection logic
+
+
 ---
