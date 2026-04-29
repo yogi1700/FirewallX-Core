@@ -10,9 +10,20 @@ with open("../config/rules.json", "r") as f:
 BLOCK_IPS = rules["block_ips"]
 BLOCK_PORTS = rules["block_ports"]
 
-# IDS alert tracking
+# Repeated block alerts
 BLOCK_COUNTS = {}
 ALERT_THRESHOLD = 3
+
+# Port scan detection
+SCAN_PORTS = {}
+SCAN_THRESHOLD = 3
+
+# Ignore common normal ports
+COMMON_SAFE_PORTS = {80, 443, 53}
+
+# Host sweep detection
+DST_TRACKING = {}
+DST_THRESHOLD = 3
 
 
 def check_ip_rule(src_ip):
@@ -38,6 +49,45 @@ def check_alert(src_ip):
         write_log(alert_msg)
 
 
+def check_port_scan(src_ip, port):
+
+    if port in COMMON_SAFE_PORTS:
+        return
+
+    if src_ip not in SCAN_PORTS:
+        SCAN_PORTS[src_ip] = set()
+
+    SCAN_PORTS[src_ip].add(port)
+
+    if len(SCAN_PORTS[src_ip]) == SCAN_THRESHOLD:
+
+        alert_msg = (
+            f"[SCAN ALERT] Possible port scan from {src_ip} "
+            f"({len(SCAN_PORTS[src_ip])} unique suspicious ports)"
+        )
+
+        print(alert_msg)
+        write_log(alert_msg)
+
+
+def check_host_sweep(src_ip, dst_ip):
+
+    if src_ip not in DST_TRACKING:
+        DST_TRACKING[src_ip] = set()
+
+    DST_TRACKING[src_ip].add(dst_ip)
+
+    if len(DST_TRACKING[src_ip]) == DST_THRESHOLD:
+
+        alert_msg = (
+            f"[HOST SWEEP ALERT] Possible recon from {src_ip} "
+            f"({len(DST_TRACKING[src_ip])} unique destinations)"
+        )
+
+        print(alert_msg)
+        write_log(alert_msg)
+
+
 def process_packet(packet):
 
     if not packet.haslayer(IP):
@@ -56,6 +106,14 @@ def process_packet(packet):
     elif packet.haslayer(UDP):
         protocol = "UDP"
         port = packet[UDP].dport
+
+    # Only track outbound traffic from your machine
+    if src_ip == "10.232.93.106":
+
+        if port:
+            check_port_scan(src_ip, port)
+
+        check_host_sweep(src_ip, dst_ip)
 
     # Rule processing
     if check_ip_rule(src_ip):
@@ -83,3 +141,9 @@ def process_packet(packet):
 
 # Capture packets
 sniff(prn=process_packet, count=30)
+
+# Session summary
+print("\n--- Summary ---")
+print("Blocked Sources:", BLOCK_COUNTS)
+print("Scan Tracking:", SCAN_PORTS)
+print("Destination Tracking:", DST_TRACKING)
