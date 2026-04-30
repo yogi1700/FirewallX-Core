@@ -1,28 +1,29 @@
 # FirewallX-Core 🔐
 
-Rule-based Smart Firewall and Intrusion Detection System (IDS) prototype built from scratch using Python and Scapy.
+Smart Firewall and Intrusion Detection System (IDS) built from scratch using Python.
 
 ---
 
 ## 🚀 Overview
 
-FirewallX-Core captures live network traffic, inspects packets, applies configurable rules, and simulates security decisions (allow / block).
+FirewallX-Core captures live network traffic, applies firewall rules, enforces blocking via Windows Firewall, and detects suspicious behavior using multiple anomaly detection techniques.
 
 ---
 
-## 🧱 Architecture
-
-Packet Capture → Parse → Rule Engine → Decision
-
----
-
-## 🎯 Current Features
+## 🎯 Features
 
 * Packet capture using Scapy
-* IP-based filtering
-* Port-based filtering
-* Dynamic JSON rule configuration
-* Simulated firewall decision engine
+* Firewall rule engine (IP & Port based)
+* Windows Firewall enforcement (netsh integration)
+* Logging system with timestamps
+* Intrusion Detection System (IDS) with multi-layer detection
+
+### 🔍 Detection Capabilities
+
+* Repeated block detection
+* Port scan detection
+* Host sweep (reconnaissance) detection
+* Time-based rate detection (burst traffic)
 
 ---
 
@@ -30,47 +31,122 @@ Packet Capture → Parse → Rule Engine → Decision
 
 * Python
 * Scapy
-* TCP/IP Networking
+* Windows Firewall (netsh)
+* Networking (TCP/IP)
 
 ---
 
-## 📌 Example Output
+## 🧠 Architecture
 
 ```text
-[BLOCKED:PORT] TCP ... PORT:53
-[BLOCKED:IP] 10.232.93.238 -> 10.232.93.106
-[ALLOWED] TCP ... PORT:443
+Packet Capture → Rule Engine → Enforce → Log → Detect → Alert
 ```
 
 ---
 
-## 📅 Progress
+## 📅 Progress Log
 
-* Day 1 — Packet capture + extraction
-* Day 2 — TCP filtering
-* Day 3 — IP filtering
-* Day 4 — Firewall engine
-* Day 5 — Dynamic JSON rules
-* ### Day 6
+### Day 1
 
-* Added Windows Firewall enforcement using Python subprocess and netsh
+* Setup Python, Scapy, Npcap
+* Captured packets
+* Extracted source/destination IPs and ports
+
+### Day 2
+
+* Added TCP filtering
+* Implemented basic port-based blocking logic
+
+### Day 3
+
+* Added IP-based filtering
+* Implemented rule checks for blocked IPs
+
+### Day 4
+
+* Combined modules into firewall_engine.py
+* Built unified rule engine (IP + Port filtering)
+
+### Day 5
+
+* Added dynamic JSON rule configuration (rules.json)
+* Refactored rule checks into functions
+* Tested simulated enforcement behavior
+
+### Day 6
+
+* Added Windows Firewall enforcement using subprocess and netsh
 * Connected rule engine decisions to automated response
-* Added firewall rule existence check to prevent duplicate rules
-* Cleaned enforcement logic
+* Added duplicate rule prevention
 
 ### Day 7
 
 * Added logging system for firewall events
 * Added threshold-based intrusion alert detection
 * Generated alerts for repeated blocked traffic
-* Reorganized legacy prototype modules into archive/src
-
+* Reorganized legacy modules into archive/src
 
 ### Day 8
+
 * Added basic port scan detection
 * Added session summary output
 * Added host sweep (reconnaissance) detection
 * Improved anomaly detection logic
 
+### Day 9
+
+* Added time-based rate detection (burst traffic detection)
+* Improved alert system by preventing duplicate alerts
+* Enhanced multi-layer IDS detection pipeline
+
+---
+
+## 📊 Example Alerts
+
+```
+[ALERT] Suspicious repeated blocks from 10.232.93.106
+[RATE ALERT] High activity from 10.232.93.106 (5 events in 5s)
+[HOST SWEEP ALERT] Possible recon from 10.232.93.106
+[SCAN ALERT] Possible port scan from 10.232.93.106
+```
+
+---
+
+## 📁 Project Structure
+
+```
+FirewallX-Core/
+├── src/
+│   ├── firewall_engine.py
+│   ├── enforce_firewall.py
+│   └── logger.py
+│
+├── archive/
+│   └── src/   # legacy prototype modules
+│
+├── config/
+├── logs/
+└── README.md
+```
+
+---
+
+## 🔮 Next Steps
+
+* Threat scoring system (combine alerts into severity levels)
+* Advanced anomaly detection
+* Real-time dashboard / UI
+* Cross-platform firewall support
+
+---
+
+## 💬 Summary
+
+FirewallX-Core has evolved from a basic packet sniffer into a **multi-layer firewall + IDS prototype** with:
+
+* Real-time traffic monitoring
+* Automated enforcement
+* Logging and alerting
+* Behavior-based anomaly detection
 
 ---
