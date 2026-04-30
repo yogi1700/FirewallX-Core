@@ -1,4 +1,5 @@
 import json
+import time
 from scapy.all import sniff, IP, TCP, UDP
 from enforce_firewall import enforce_ip_block
 from logger import write_log
@@ -25,6 +26,17 @@ COMMON_SAFE_PORTS = {80, 443, 53}
 DST_TRACKING = {}
 DST_THRESHOLD = 3
 
+# Rate detection
+RATE_TRACKER = {}
+RATE_THRESHOLD = 5
+TIME_WINDOW = 5  # seconds
+
+# Prevent duplicate alerts
+HOST_SWEEP_ALERTED = set()
+RATE_ALERTED = set()
+SCAN_ALERTED = set()
+REPEAT_ALERTED = set()
+
 
 def check_ip_rule(src_ip):
     return src_ip in BLOCK_IPS
@@ -41,10 +53,13 @@ def check_alert(src_ip):
 
     BLOCK_COUNTS[src_ip] += 1
 
-    if BLOCK_COUNTS[src_ip] == ALERT_THRESHOLD:
+    if (
+        BLOCK_COUNTS[src_ip] == ALERT_THRESHOLD
+        and src_ip not in REPEAT_ALERTED
+    ):
+        REPEAT_ALERTED.add(src_ip)
 
         alert_msg = f"[ALERT] Suspicious repeated blocks from {src_ip}"
-
         print(alert_msg)
         write_log(alert_msg)
 
@@ -59,7 +74,11 @@ def check_port_scan(src_ip, port):
 
     SCAN_PORTS[src_ip].add(port)
 
-    if len(SCAN_PORTS[src_ip]) == SCAN_THRESHOLD:
+    if (
+        len(SCAN_PORTS[src_ip]) == SCAN_THRESHOLD
+        and src_ip not in SCAN_ALERTED
+    ):
+        SCAN_ALERTED.add(src_ip)
 
         alert_msg = (
             f"[SCAN ALERT] Possible port scan from {src_ip} "
@@ -77,11 +96,45 @@ def check_host_sweep(src_ip, dst_ip):
 
     DST_TRACKING[src_ip].add(dst_ip)
 
-    if len(DST_TRACKING[src_ip]) == DST_THRESHOLD:
+    if (
+        len(DST_TRACKING[src_ip]) == DST_THRESHOLD
+        and src_ip not in HOST_SWEEP_ALERTED
+    ):
+        HOST_SWEEP_ALERTED.add(src_ip)
 
         alert_msg = (
             f"[HOST SWEEP ALERT] Possible recon from {src_ip} "
             f"({len(DST_TRACKING[src_ip])} unique destinations)"
+        )
+
+        print(alert_msg)
+        write_log(alert_msg)
+
+
+def check_rate_limit(src_ip):
+
+    current_time = time.time()
+
+    if src_ip not in RATE_TRACKER:
+        RATE_TRACKER[src_ip] = []
+
+    # Keep only timestamps within time window
+    RATE_TRACKER[src_ip] = [
+        t for t in RATE_TRACKER[src_ip]
+        if current_time - t <= TIME_WINDOW
+    ]
+
+    RATE_TRACKER[src_ip].append(current_time)
+
+    if (
+        len(RATE_TRACKER[src_ip]) == RATE_THRESHOLD
+        and src_ip not in RATE_ALERTED
+    ):
+        RATE_ALERTED.add(src_ip)
+
+        alert_msg = (
+            f"[RATE ALERT] High activity from {src_ip} "
+            f"({len(RATE_TRACKER[src_ip])} events in {TIME_WINDOW}s)"
         )
 
         print(alert_msg)
@@ -99,6 +152,9 @@ def process_packet(packet):
     protocol = "OTHER"
     port = ""
 
+    # Time-based detection
+    check_rate_limit(src_ip)
+
     if packet.haslayer(TCP):
         protocol = "TCP"
         port = packet[TCP].dport
@@ -107,7 +163,7 @@ def process_packet(packet):
         protocol = "UDP"
         port = packet[UDP].dport
 
-    # Only track outbound traffic from your machine
+    # Only track outbound traffic (your machine)
     if src_ip == "10.232.93.106":
 
         if port:
@@ -147,3 +203,4 @@ print("\n--- Summary ---")
 print("Blocked Sources:", BLOCK_COUNTS)
 print("Scan Tracking:", SCAN_PORTS)
 print("Destination Tracking:", DST_TRACKING)
+print("Rate Tracking:", {k: len(v) for k, v in RATE_TRACKER.items()})
