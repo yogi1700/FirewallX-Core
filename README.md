@@ -1,6 +1,92 @@
 # FirewallX-Core 🔐
 
 Smart Firewall and Intrusion Detection System (IDS) built from scratch using Python.
+## 🔄 System Flow
+
+FirewallX-Core follows a multi-stage pipeline:
+
+```text
+Packet Capture → Parsing → Detection → Threat Scoring → Enforcement → Logging → Summary
+```
+
+### 1. Packet Capture
+
+* Uses Scapy to capture live network packets
+* Each packet is processed in real-time
+
+### 2. Packet Parsing
+
+* Extracts:
+
+  * Source IP
+  * Destination IP
+  * Protocol (TCP/UDP)
+  * Port number
+
+### 3. Monitoring Filter
+
+* Focuses only on traffic originating from the local machine
+* Reduces noise from external network traffic
+
+### 4. Detection Layer (IDS)
+
+Multiple anomaly detection techniques are applied:
+
+* **Rate Detection**
+  Detects burst traffic within a short time window
+
+* **Host Sweep Detection**
+  Detects communication with multiple destination IPs (possible reconnaissance)
+
+* **Port Scan Detection**
+  Detects access to multiple ports from a single source
+
+* **Repeated Block Detection**
+  Identifies repeated blocked traffic from the same source
+
+### 5. Threat Scoring System
+
+Each detected event contributes to a cumulative threat score:
+
+* Repeated block → +2
+* Rate alert → +3
+* Host sweep → +3
+* Port scan → +4
+
+### 6. Threat Levels
+
+Based on accumulated score:
+
+* LOW (0–3)
+* MEDIUM (4–6)
+* HIGH (7–9)
+* CRITICAL (10+)
+
+### 7. Rule Engine
+
+Applies firewall rules from configuration:
+
+* Block specific IPs
+* Block specific ports
+
+### 8. Enforcement
+
+* Automatically applies blocking rules using Windows Firewall (netsh)
+
+### 9. Logging
+
+* All events are logged for analysis
+* Stored in `logs/firewall.log`
+
+### 10. Session Summary
+
+Displays:
+
+* Blocked sources
+* Scan tracking
+* Destination tracking
+* Rate tracking
+* Threat scores
 
 ---
 
