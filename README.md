@@ -1,4 +1,4 @@
-# FirewallX-Core 🔐
+# FirewallX-Core
 
 Smart Firewall and Intrusion Detection System (IDS) built from scratch using Python.
 ## 🔄 System Flow
