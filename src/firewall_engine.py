@@ -1,46 +1,67 @@
 import json
 import time
+import socket
 from scapy.all import sniff, IP, TCP, UDP
 from enforce_firewall import enforce_ip_block
 from logger import write_log
 
-# Load rules
+
+# ---------- Dynamic Local IP Detection ----------
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
+
+
+LOCAL_IP = get_local_ip()
+print(f"[INFO] Local IP detected: {LOCAL_IP}")
+
+
+# ---------- Flexible Monitoring Configuration ----------
+MONITORED_IPS = {LOCAL_IP}
+
+
+# ---------- Load Firewall Rules ----------
 with open("../config/rules.json", "r") as f:
     rules = json.load(f)
 
 BLOCK_IPS = rules["block_ips"]
 BLOCK_PORTS = rules["block_ports"]
 
-# Threat scoring
+
+# ---------- Threat Scoring System ----------
 THREAT_SCORE = {}
 
-# Repeated block alerts
+
+# ---------- Detection Configuration ----------
 BLOCK_COUNTS = {}
 ALERT_THRESHOLD = 3
 
-# Port scan detection
 SCAN_PORTS = {}
 SCAN_THRESHOLD = 3
 
-# Ignore common normal ports
 COMMON_SAFE_PORTS = {80, 443, 53}
 
-# Host sweep detection
 DST_TRACKING = {}
 DST_THRESHOLD = 3
 
-# Rate detection
 RATE_TRACKER = {}
 RATE_THRESHOLD = 5
 TIME_WINDOW = 5
 
-# Prevent duplicate alerts
+
+# ---------- Alert Control (Prevent Duplicates) ----------
 HOST_SWEEP_ALERTED = set()
 RATE_ALERTED = set()
 SCAN_ALERTED = set()
 REPEAT_ALERTED = set()
 
 
+# ---------- Threat Scoring Logic ----------
 def update_threat_score(src_ip, score):
 
     if src_ip not in THREAT_SCORE:
@@ -60,6 +81,7 @@ def update_threat_score(src_ip, score):
     print(f"[THREAT] {src_ip} Score={THREAT_SCORE[src_ip]} Level={level}")
 
 
+# ---------- Rule Check Functions ----------
 def check_ip_rule(src_ip):
     return src_ip in BLOCK_IPS
 
@@ -68,6 +90,7 @@ def check_port_rule(port):
     return port in BLOCK_PORTS
 
 
+# ---------- Repeated Block Detection ----------
 def check_alert(src_ip):
 
     if src_ip not in BLOCK_COUNTS:
@@ -88,6 +111,7 @@ def check_alert(src_ip):
         update_threat_score(src_ip, 2)
 
 
+# ---------- Port Scan Detection ----------
 def check_port_scan(src_ip, port):
 
     if port in COMMON_SAFE_PORTS:
@@ -115,6 +139,7 @@ def check_port_scan(src_ip, port):
         update_threat_score(src_ip, 4)
 
 
+# ---------- Host Sweep Detection ----------
 def check_host_sweep(src_ip, dst_ip):
 
     if src_ip not in DST_TRACKING:
@@ -139,6 +164,7 @@ def check_host_sweep(src_ip, dst_ip):
         update_threat_score(src_ip, 3)
 
 
+# ---------- Rate-Based Detection ----------
 def check_rate_limit(src_ip):
 
     current_time = time.time()
@@ -170,6 +196,7 @@ def check_rate_limit(src_ip):
         update_threat_score(src_ip, 3)
 
 
+# ---------- Packet Processing Engine ----------
 def process_packet(packet):
 
     if not packet.haslayer(IP):
@@ -181,9 +208,11 @@ def process_packet(packet):
     protocol = "OTHER"
     port = ""
 
-    # Time-based detection
-    check_rate_limit(src_ip)
+    # ---------- Rate Detection ----------
+    if src_ip in MONITORED_IPS:
+        check_rate_limit(src_ip)
 
+    # ---------- Protocol Parsing ----------
     if packet.haslayer(TCP):
         protocol = "TCP"
         port = packet[TCP].dport
@@ -192,15 +221,15 @@ def process_packet(packet):
         protocol = "UDP"
         port = packet[UDP].dport
 
-    # Only track outbound traffic (your machine)
-    if src_ip == "10.232.93.106":
+    # ---------- Behavior Detection ----------
+    if src_ip in MONITORED_IPS:
 
         if port:
             check_port_scan(src_ip, port)
 
         check_host_sweep(src_ip, dst_ip)
 
-    # Rule processing
+    # ---------- Rule Engine ----------
     if check_ip_rule(src_ip):
 
         msg = f"[BLOCKED:IP] {src_ip} -> {dst_ip}"
@@ -224,10 +253,11 @@ def process_packet(packet):
         write_log(msg)
 
 
-# Capture packets
+# ---------- Start Packet Capture ----------
 sniff(prn=process_packet, count=30)
 
-# Summary
+
+# ---------- Session Summary ----------
 print("\n--- Summary ---")
 print("Blocked Sources:", BLOCK_COUNTS)
 print("Scan Tracking:", SCAN_PORTS)
