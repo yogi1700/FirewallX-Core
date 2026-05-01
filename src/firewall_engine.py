@@ -11,6 +11,9 @@ with open("../config/rules.json", "r") as f:
 BLOCK_IPS = rules["block_ips"]
 BLOCK_PORTS = rules["block_ports"]
 
+# Threat scoring
+THREAT_SCORE = {}
+
 # Repeated block alerts
 BLOCK_COUNTS = {}
 ALERT_THRESHOLD = 3
@@ -29,13 +32,32 @@ DST_THRESHOLD = 3
 # Rate detection
 RATE_TRACKER = {}
 RATE_THRESHOLD = 5
-TIME_WINDOW = 5  # seconds
+TIME_WINDOW = 5
 
 # Prevent duplicate alerts
 HOST_SWEEP_ALERTED = set()
 RATE_ALERTED = set()
 SCAN_ALERTED = set()
 REPEAT_ALERTED = set()
+
+
+def update_threat_score(src_ip, score):
+
+    if src_ip not in THREAT_SCORE:
+        THREAT_SCORE[src_ip] = 0
+
+    THREAT_SCORE[src_ip] += score
+
+    level = "LOW"
+
+    if THREAT_SCORE[src_ip] >= 10:
+        level = "CRITICAL"
+    elif THREAT_SCORE[src_ip] >= 7:
+        level = "HIGH"
+    elif THREAT_SCORE[src_ip] >= 4:
+        level = "MEDIUM"
+
+    print(f"[THREAT] {src_ip} Score={THREAT_SCORE[src_ip]} Level={level}")
 
 
 def check_ip_rule(src_ip):
@@ -63,6 +85,8 @@ def check_alert(src_ip):
         print(alert_msg)
         write_log(alert_msg)
 
+        update_threat_score(src_ip, 2)
+
 
 def check_port_scan(src_ip, port):
 
@@ -88,6 +112,8 @@ def check_port_scan(src_ip, port):
         print(alert_msg)
         write_log(alert_msg)
 
+        update_threat_score(src_ip, 4)
+
 
 def check_host_sweep(src_ip, dst_ip):
 
@@ -110,6 +136,8 @@ def check_host_sweep(src_ip, dst_ip):
         print(alert_msg)
         write_log(alert_msg)
 
+        update_threat_score(src_ip, 3)
+
 
 def check_rate_limit(src_ip):
 
@@ -118,7 +146,6 @@ def check_rate_limit(src_ip):
     if src_ip not in RATE_TRACKER:
         RATE_TRACKER[src_ip] = []
 
-    # Keep only timestamps within time window
     RATE_TRACKER[src_ip] = [
         t for t in RATE_TRACKER[src_ip]
         if current_time - t <= TIME_WINDOW
@@ -139,6 +166,8 @@ def check_rate_limit(src_ip):
 
         print(alert_msg)
         write_log(alert_msg)
+
+        update_threat_score(src_ip, 3)
 
 
 def process_packet(packet):
@@ -198,9 +227,10 @@ def process_packet(packet):
 # Capture packets
 sniff(prn=process_packet, count=30)
 
-# Session summary
+# Summary
 print("\n--- Summary ---")
 print("Blocked Sources:", BLOCK_COUNTS)
 print("Scan Tracking:", SCAN_PORTS)
 print("Destination Tracking:", DST_TRACKING)
 print("Rate Tracking:", {k: len(v) for k, v in RATE_TRACKER.items()})
+print("Threat Scores:", THREAT_SCORE)
