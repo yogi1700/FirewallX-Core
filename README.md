@@ -1,4 +1,4 @@
-# FirewallX-Core 🔐
+# FirewallX-Core
 
 Smart Firewall and Intrusion Detection System (IDS) built from scratch using Python.
 ## 🔄 System Flow
@@ -90,46 +90,6 @@ Displays:
 
 ---
 
-## 🚀 Overview
-
-FirewallX-Core captures live network traffic, applies firewall rules, enforces blocking via Windows Firewall, and detects suspicious behavior using multiple anomaly detection techniques.
-
----
-
-## 🎯 Features
-
-* Packet capture using Scapy
-* Firewall rule engine (IP & Port based)
-* Windows Firewall enforcement (netsh integration)
-* Logging system with timestamps
-* Intrusion Detection System (IDS) with multi-layer detection
-
-### 🔍 Detection Capabilities
-
-* Repeated block detection
-* Port scan detection
-* Host sweep (reconnaissance) detection
-* Time-based rate detection (burst traffic)
-
----
-
-## 🛠️ Tech Stack
-
-* Python
-* Scapy
-* Windows Firewall (netsh)
-* Networking (TCP/IP)
-
----
-
-## 🧠 Architecture
-
-```text
-Packet Capture → Rule Engine → Enforce → Log → Detect → Alert
-```
-
----
-
 ## 📅 Progress Log
 
 ### Day 1
@@ -185,54 +145,11 @@ Packet Capture → Rule Engine → Enforce → Log → Detect → Alert
 * Improved alert system by preventing duplicate alerts
 * Enhanced multi-layer IDS detection pipeline
 
----
+### Day 10
 
-## 📊 Example Alerts
-
-```
-[ALERT] Suspicious repeated blocks from 10.232.93.106
-[RATE ALERT] High activity from 10.232.93.106 (5 events in 5s)
-[HOST SWEEP ALERT] Possible recon from 10.232.93.106
-[SCAN ALERT] Possible port scan from 10.232.93.106
-```
-
----
-
-## 📁 Project Structure
-
-```
-FirewallX-Core/
-├── src/
-│   ├── firewall_engine.py
-│   ├── enforce_firewall.py
-│   └── logger.py
-│
-├── archive/
-│   └── src/   # legacy prototype modules
-│
-├── config/
-├── logs/
-└── README.md
-```
-
----
-
-## 🔮 Next Steps
-
-* Threat scoring system (combine alerts into severity levels)
-* Advanced anomaly detection
-* Real-time dashboard / UI
-* Cross-platform firewall support
-
----
-
-## 💬 Summary
-
-FirewallX-Core has evolved from a basic packet sniffer into a **multi-layer firewall + IDS prototype** with:
-
-* Real-time traffic monitoring
-* Automated enforcement
-* Logging and alerting
-* Behavior-based anomaly detection
-
----
+* Added threat scoring system to evaluate risk based on multiple alerts
+* Introduced severity levels (LOW, MEDIUM, HIGH, CRITICAL)
+* Integrated scoring across all detection mechanisms
+* Replaced static IP checks with dynamic local IP detection
+* Added flexible monitoring system for scalable network analysis
+* Refactored code structure for better readability and maintainability
