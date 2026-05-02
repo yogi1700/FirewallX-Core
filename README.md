@@ -153,3 +153,14 @@ Displays:
 * Replaced static IP checks with dynamic local IP detection
 * Added flexible monitoring system for scalable network analysis
 * Refactored code structure for better readability and maintainability
+
+### Day 11
+
+* Implemented auto-response system (IPS layer)
+* Added threat-based decision logic (LOW → CRITICAL)
+* Enabled automatic firewall blocking on CRITICAL threat level
+* Prevented duplicate blocking using state tracking
+* Improved detection logic to allow continuous scoring
+* Introduced cooldown mechanism to avoid alert spam
+* Achieved full IDS → IPS transition
+
