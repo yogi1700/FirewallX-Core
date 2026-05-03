@@ -8,6 +8,101 @@ FirewallX-Core follows a multi-stage pipeline:
 ```text
 Packet Capture → Parsing → Detection → Threat Scoring → Enforcement → Logging → Summary
 ```
+                        ┌───────────────────┐
+                        │ Packet Arrives    │
+                        │ (Scapy sniff)     │
+                        └─────────┬─────────┘
+                                  ↓
+                        ┌───────────────────┐
+                        │ IP Layer Check     │
+                        │ haslayer(IP)?      │
+                        └─────────┬─────────┘
+                                  ↓
+                        ┌────────────────────────┐
+                        │ Extract Packet Data     │
+                        │ src_ip, dst_ip, port   │
+                        └─────────┬─────────────┘
+                                  ↓
+            ┌──────────────────────────────────────────┐
+            │ Is src_ip == LOCAL_IP ?                  │
+            └───────────┬───────────────────────┬──────┘
+                        │ YES                   │ NO
+                        ↓                       ↓
+        ┌──────────────────────────┐        Skip Detection
+        │     DETECTION ENGINE      │
+        └──────────┬───────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Rate Detection             │
+        │ - Track timestamps         │
+        │ - Detect burst traffic     │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Port Scan Detection        │
+        │ - Track unique ports       │
+        │ - Ignore safe ports        │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Host Sweep Detection       │
+        │ - Track destination IPs    │
+        │ - Detect recon behavior    │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Cooldown Control           │
+        │ - Prevent alert spam       │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Trigger Alert              │
+        │ - RATE ALERT               │
+        │ - SCAN ALERT               │
+        │ - HOST SWEEP ALERT         │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Threat Scoring Engine      │
+        │ update_threat_score()      │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Calculate Threat Level     │
+        │ LOW / MED / HIGH / CRIT    │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────────┐
+        │ Decision Engine (IPS Logic)    │
+        │                                │
+        │ LOW      → Log only            │
+        │ MEDIUM   → Monitor             │
+        │ HIGH     → Warning             │
+        │ CRITICAL → Auto Block          │
+        └──────────┬─────────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Auto Response (if needed)  │
+        │ enforce_ip_block()         │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Firewall Rule Check        │
+        │ - Block IP?                │
+        │ - Block Port?              │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Output Layer               │
+        │ - Print message            │
+        │ - Write log                │
+        └──────────┬─────────────────┘
+                   ↓
+        ┌────────────────────────────┐
+        │ Session Summary            │
+        │ - Threat scores            │
+        │ - Tracking data            │
+        └────────────────────────────┘
 
 ### 1. Packet Capture
 
