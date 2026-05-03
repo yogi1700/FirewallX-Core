@@ -14,14 +14,14 @@ Packet Capture → Parsing → Detection → Threat Scoring → Enforcement → 
                         └─────────┬─────────┘
                                   ↓
                         ┌───────────────────┐
-                        │ IP Layer Check     │
-                        │ haslayer(IP)?      │
+                        │ IP Layer Check    │
+                        │ haslayer(IP)?     │
                         └─────────┬─────────┘
                                   ↓
                         ┌────────────────────────┐
-                        │ Extract Packet Data     │
+                        │ Extract Packet Data    │
                         │ src_ip, dst_ip, port   │
-                        └─────────┬─────────────┘
+                        └─────────┬───────────── ┘
                                   ↓
             ┌──────────────────────────────────────────┐
             │ Is src_ip == LOCAL_IP ?                  │
@@ -258,4 +258,17 @@ Displays:
 * Improved detection logic to allow continuous scoring
 * Introduced cooldown mechanism to avoid alert spam
 * Achieved full IDS → IPS transition
+
+### Day 12
+
+* Implemented time-based threat score decay
+* Added LAST_ACTIVITY tracking for each IP
+* Introduced decay interval to reduce scores over time
+* Implemented cleanup of inactive IPs (score = 0)
+* Optimized decay execution using time-based scheduling
+* Fixed uncontrolled score growth using score cap
+* Tuned detection thresholds to reduce false positives
+* Improved cooldown handling to prevent alert spam
+* Stabilized system behavior for real-world traffic
+
 
